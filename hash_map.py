@@ -12,11 +12,18 @@
 
 class Dict(object):
 
+    _size = 0
+
     def __init__(self, data=None):
         self._data = [None for _ in xrange(100)]
 
         if data:
             self.update(data)
+
+
+    def __sizeof__(self):
+
+        return self._size
 
     def __repr__(self):
         """Print representation of class"""
@@ -43,22 +50,35 @@ class Dict(object):
     def has_key(self, key):
         """Return True if key in self._data"""
 
-        if self._getitem(key):
+        if self._getitem(key) is not None:
             return True
 
         return False
 
 
     def _getitem(self, key):
-        """Return key if key in self._data"""
+        """Return index of key's hash in self._data,
 
+        If position occupied, and keys do not match (hash colission) will
+        continue search, terminating when key or None value found.
 
-        hsh_val = self._gethash(key)
-        pos = self._data[hsh_val]
-        if pos:
-            # if type list -> check for k
-            # else - assume we have the correct key, and no collisions
-            return pos[0]
+        Always returns index.
+        """
+
+        hsh_idx = self._gethash(key)
+        cur_pos = self._data[hsh_idx]
+        struct_size = len(self._data)
+
+        while cur_pos is not None:
+            if cur_pos[0] == key:
+                return hsh_idx
+
+            else:
+                # treat as circullar array
+                hsh_idx = (hsh_idx + 1) % struct_size
+                cur_pos = self._data[hsh_idx]
+
+        return hsh_idx
 
 
     def _getitems(self, items="pairs"):
@@ -128,28 +148,37 @@ class Dict(object):
         # can i make and return a copy
 
         if isinstance(data, list):
-            for pair in data:
-                k, v = pair
-                hsh_val = self._gethash(k)
-                # TODO deal with hash collisions >> change type to list, store all pairs as flat array
-                is_key = self._getitem(k)
-                if is_key and is_key[0] == k:
-                    self._data[hsh_val][1] = v
-                else:
-                    self._data[hsh_val] = (k, v)
+            # k is a tuple (key, value)
+            for k in data:
+                # _getitem returns index for k in self._data (either a tuple or None) we overwrite.
+                pos = self._getitem(k[0])
+                self._data[pos] = k
+            # for pair in data:
+            #     k, v = pair
+            #     hsh_val = self._gethash(k)
+            #     is_key = self._getitem(k)
+            #     if is_key and is_key[0] == k:
+            #         self._data[hsh_val][1] = v
+            #     else:
+            #         self._data[hsh_val] = (k, v)
 
         elif isinstance(data, dict):
             for k in data:
+                pos = self._getitem(k)
+                self._data[pos] = (k, data[k])
+
                 # print "Trying hash: ", k, "Type: ", type(k)
-                hsh_val = self._gethash(k)
-                # TODO deal with hash collisions >> change type to list, store all pairs as flat array
-                is_key = self._getitem(k)
-                if is_key and is_key[0] == k:
-                    new_pair = (k, data[k])
-                else:
-                    new_pair = (k, data[k])
+                # hsh_val = self._gethash(k)
+                # is_key = self._getitem(k)
+                # while is_key not None:
+                #     if is_key[0] == k:
+                #         new_pair = (k, data[k])
+                #     else:
+                #
+                # else:
+                #     new_pair = (k, data[k])
+                #
+                # self._data[hsh_val] = new_pair
 
-                self._data[hsh_val] = new_pair
-
-                # if k in dict, update values (hasitem) (make sure it's the same physical key)
-                # else, new key,val @ hash (make sure no key collision, might be taken care of above)
+    # if k in dict, update values (hasitem) (make sure it's the same physical key)
+    # else, new key,val @ hash (make sure no key collision, might be taken care of above)
