@@ -24,7 +24,8 @@ groups = [
 
 # valid connections - up, down, left, right
 1. iterate over list until occupied cell found - add corrdinates to set
-    2. from occupied cell, find all neighbors 
+    2. from occupied cell, find all neighbors
+
 
 
 
