@@ -48,6 +48,3 @@ class JobPool(object):
 
         job.next = None
         return job
-
-
-    # when we are idle start to complete from our set of jobs
