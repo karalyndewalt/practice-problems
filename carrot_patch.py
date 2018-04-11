@@ -20,6 +20,7 @@ marlon_bundo_eat(carrot_patch)
 30
 """
 
+
 def on_board(pos, size):
     """Checks if a coodinate set is on a board of size
 
@@ -73,24 +74,64 @@ def eat_max_carrots(matrix, pos, total=None):
     return eat_max_carrots(matrix, new_pos, (total + biggest_neighbor[0]))
 
 
-def marlon_bundo_eat(matrix):
-    """Returns int for highest value traversal from matrix center
+def get_center(num):
+    """Returns list of center points for list"""
 
-    if no center, *should* use highest value from center group
+    half = num/2
+
+    center = []
+
+    # is even (half-1, half)
+    if num % 2 == 0:
+        center.extend([half - 1, half])
+    # is odd half (use floor)
+    else:
+        center.append(half)
+
+    return center
+
+
+def find_center_coordinate(matrix):
+    """Returns coordinates for center of n x m matrix
+
+        Odd board returns center coordinates
+        Even board returns coordinates of highest value found in center group.
+
     """
 
-    num_rows = len(matrix)
-    num_columns = len(matrix[0])
+    height = len(matrix)
+    width = len(matrix[0])
+    size = (height, width)
 
-    # if both the rows and columns are odd you have a center pt. at the floor
-    # division of both the column and rows.
+    row_centers = get_center(height)
+    col_centers = get_center(width)
 
-    row_mid_pt = num_rows/2
-    col_mid_pt = num_columns/2
+    coordinate_set = [(row, col) for row in row_centers for col in col_centers]
+    coordinates = max([get_carrot_count(matrix, pos, size,) for pos in coordinate_set])
 
-    # for now (time constraints) assume center for odd, regular matrix
-    center = (row_mid_pt, col_mid_pt)
+    return coordinates[1]
 
+
+def marlon_bundo_eat(matrix):
+    """Returns sum of highest value traversal from the matrix center
+
+    Uses center or highest value from center group
+    """
+
+    # num_rows = len(matrix)
+    # num_columns = len(matrix[0])
+    #
+    # # if both the rows and columns are odd you have a center pt. at the floor
+    # # division of both the column and rows.
+    #
+    # row_mid_pt = num_rows/2
+    # col_mid_pt = num_columns/2
+    #
+    # # for now (time constraints) assume center for odd, regular matrix
+    # center = (row_mid_pt, col_mid_pt)
+
+    center = find_center_coordinate(matrix)
+    print center
 
     total = eat_max_carrots(matrix, center)
 
@@ -103,5 +144,8 @@ carrot_patch = [[5, 7, 8, 6, 3],
                 [3, 1, 0, 5, 8],
                 [3, 1, 0, 5, 8]]
 
+print find_center_coordinate(carrot_patch)
 
 total_carrots = marlon_bundo_eat(carrot_patch)
+
+print total_carrots
